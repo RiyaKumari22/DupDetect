@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocMatch - Document Comparator</title>
+    <style>
+        /* Basic reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #444;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-label:hover {
+            background: #0056b3;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
+            background: #28a745;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #444;
+        }
+
+        .loading {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo">DupDetect </div>
+    <h2>Compare Two Documents</h2>
+    <form id="compareForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file1" class="file-label">Select the first document</label>
+            <input type="file" id="file1" name="file1" required>
+        </div>
+        <div class="form-group">
+            <label for="file2" class="file-label">Select the second document</label>
+            <input type="file" id="file2" name="file2" required>
+        </div>
+        <button type="submit">Compare</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    const file1Label = document.querySelector('label[for="file1"]');
+    const file2Label = document.querySelector('label[for="file2"]');
+    const resultDiv = document.getElementById("result");
+
+    document.getElementById("file1").addEventListener("change", function() {
+        file1Label.textContent = this.files[0] ? this.files[0].name : "Select the first document";
+    });
+
+    document.getElementById("file2").addEventListener("change", function() {
+        file2Label.textContent = this.files[0] ? this.files[0].name : "Select the second document";
+    });
+
+    document.getElementById("compareForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const file1 = document.getElementById("file1").files[0];
+        const file2 = document.getElementById("file2").files[0];
+
+        if (!file1 || !file2) {
+            alert("Please select both files.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file1", file1);
+        formData.append("file2", file2);
+
+        resultDiv.innerHTML = '<span class="loading">Comparing documents, please wait...</span>';
+
+        try {
+            const response = await fetch("/compare", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                resultDiv.innerHTML = `The documents match by <strong>${result.matchPercentage.toFixed(2)}%</strong>`;
+            } else {
+                resultDiv.innerHTML = "Error comparing files.";
+            }
+        } catch (error) {
+            resultDiv.innerHTML = "An error occurred: " + error.message;
+        }
+    });
+</script>
+
+</body>
+</html>
