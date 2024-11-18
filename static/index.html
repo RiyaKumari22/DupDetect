@@ -3,128 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocMatch - Document Comparator</title>
+    <title>DupDetect - Document Comparator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
     <style>
-        /* Basic reset */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #f5f7fa;
-            color: #333;
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #007bff, #4a90e2);
+        color: #333;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+    .container {
+        width: 100%;
+        max-width: 700px;
+        padding: 30px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        margin-top: 60px;
+    }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 1rem;
-        }
+    .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 1.2rem;
+    }
 
-        h2 {
-            font-size: 1.8rem;
-            color: #444;
-            margin-bottom: 1rem;
-        }
+    h2 {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 1rem;
+    }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+    .form-group {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
 
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #666;
-        }
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
 
-        input[type="file"] {
-            display: none;
-        }
+    input[type="file"] {
+        display: none;
+    }
 
-        .file-label {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #007bff;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    .file-label {
+        display:inline-block;
+        padding: 12px 25px;
+        background: #007bff;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
 
-        .file-label:hover {
-            background: #0056b3;
-        }
+    .file-label:hover {
+        background: #0056b3;
+    }
 
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: #fff;
-            background: #28a745;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    button {
+        padding: 12px 25px;
+        font-size: 1rem;
+        color: #fff;
+        background: #28a745;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
 
-        button:hover {
-            background: #218838;
-        }
+    button:hover {
+        background: #218838;
+    }
 
-        #result {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: #444;
-        }
+    #result {
+        margin-top: 20px;
+        font-size: 1.2em;
+        color: #444;
+        font-weight: bold;
+    }
 
-        .loading {
-            font-size: 1.2em;
-            color: #007bff;
-        }
-    </style>
+    .documents {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        gap: 15px;
+    }
+
+    .doc-container {
+        flex: 1;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+        max-height: 400px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .highlight {
+        background-color: #ffeb3b;
+        font-weight: bold;
+        padding: 2px;
+        border-radius: 3px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 600px;
+        text-align: left;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+        max-height: 80%;
+    }
+
+    .modal-header {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 15px;
+    }
+
+    .modal-body {
+        font-size: 1rem;
+        color: #333;
+        line-height: 1.5;
+    }
+
+    .modal-footer {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .close-btn {
+        padding: 10px 20px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .close-btn:hover {
+        background: #0056b3;
+    }
+    .about-section {
+      max-width: 2000px;
+      margin: 40px auto;
+      padding: 40px;
+      background-color: #f5f5f5;
+      border-radius: 0px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Title styling */
+    .about-section h2 {
+      font-size: 2em;
+      color:#007bff;
+      font-family: Georgia, 'Times New Roman', Times, serif;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    /* Paragraph styling */
+    .about-section p {
+      font-size: 1.1em;
+      line-height: 1.6;
+      color: #555;
+      text-align: justify;
+      margin-bottom: 15px;
+    }
+
+    /* Highlighted text */
+    .about-section strong {
+      color: #0073e6;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .about-section {
+        padding: 20px;
+      }
+
+      .about-section h2 {
+        font-size: 1.5em;
+      }
+
+      .about-section p {
+        font-size: 1em;
+      }
+    }
+    .features-section {
+      padding: 60px 0;
+      /* background-color: #0073e6; */
+    }
+
+    .feature-box {
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-box:hover {
+      transform: translateY(-10px);
+    }
+
+    .feature-icon {
+      font-size: 40px;
+      color: #0073e6;
+      margin-bottom: 15px;
+    }
+
+    .feature-title {
+      font-size: 1.25em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .feature-description {
+      font-size: 1em;
+      color: #555;
+      line-height: 1.6;
+    }
+  </style>
 </head>
-<body>
 
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+  <a class="navbar-brand-primary" style="font-weight: bolder;font-size: larger;" href="#">DupDetect</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#about-section">About Us</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#features-section">Features</a>
+      </li>
+     
+    </ul>
+  </div>
+</nav>
 <div class="container">
-    <div class="logo">DupDetect </div>
+    <div class="logo">DupDetect</div>
     <h2>Compare Two Documents</h2>
     <form id="compareForm" enctype="multipart/form-data">
         <div class="form-group">
             <label for="file1" class="file-label">Select the first document</label>
-            <input type="file" id="file1" name="file1" required>
+            <input type="file" id="file1" name="file1" accept=".txt" required>
         </div>
         <div class="form-group">
             <label for="file2" class="file-label">Select the second document</label>
-            <input type="file" id="file2" name="file2" required>
+            <input type="file" id="file2" name="file2" accept=".txt" required>
         </div>
         <button type="submit">Compare</button>
     </form>
 
     <div id="result"></div>
+
+    <div class="documents" id="documents" style="display: none;">
+        <div class="doc-container" id="doc1"></div>
+        <div class="doc-container" id="doc2"></div>
+    </div>
 </div>
+
+<!-- Modal for displaying differences -->
+<div id="differenceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Differences Found</div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+<div class="about-section" id="about-section">
+    <h2>About Us</h2>
+    <p>Welcome to <strong>Document Comparator</strong>, a powerful and intuitive tool designed to help you compare documents with ease and precision. Our mission is to make document analysis faster, smarter, and more accurate for everyone—from students and professionals to businesses and legal experts.</p>
+    
+    <p>Our team is committed to creating a seamless experience that streamlines the comparison process, allowing you to highlight differences, track changes, and ensure document consistency with just a few clicks. Built with cutting-edge technology, <strong>Document Comparator</strong> supports a variety of document formats and is engineered to handle complex files efficiently.</p>
+    
+    <p>Whether you need to spot minor changes in lengthy contracts, compare versions of critical reports, or ensure the accuracy of collaborative documents, <strong>Document Comparator</strong> is here to simplify your workflow. We believe in saving you time and enhancing productivity by providing insights that matter.</p>
+    
+    <p>Thank you for choosing us as your trusted document comparison partner. We’re excited to support you on your journey to document accuracy and excellence!</p>
+  </div>
+  <section class="features-section" id="features-section">
+    <div class="container">
+      <h2 class="text-center mb-5">Features</h2>
+      <div class="row">
+        <!-- Feature 1 -->
+        <div class="col-md-4 mb-4">
+          <div class="feature-box">
+            <div class="feature-icon">
+                <i class="fa-solid fa-file"></i> <!-- Replace with icon library -->
+            </div>
+            <h3 class="feature-title">Document Comparison</h3>
+            <p class="feature-description">Easily compare documents side by side to identify differences and ensure accuracy.</p>
+          </div>
+        </div>
+        <!-- Feature 2 -->
+        <div class="col-md-4 mb-4">
+          <div class="feature-box">
+            <div class="feature-icon">
+              <i class="fas fa-search"></i>
+            </div>
+            <h3 class="feature-title">Quick Search</h3>
+            <p class="feature-description">Instantly search and find specific changes across lengthy documents with ease.</p>
+          </div>
+        </div>
+        <!-- Feature 3 -->
+        <div class="col-md-4 mb-4">
+          <div class="feature-box">
+            <div class="feature-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <h3 class="feature-title">Secure & Private</h3>
+            <p class="feature-description">Our platform ensures your data is protected and remains confidential at all times.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer>
+    <div class="text-center p-4" style="background-color: rgba(255, 255, 255, 0.932);">
+      © 2021 Copyright:
+      <a class="text-reset fw-bold" href="#">DupDetect</a>
+    </div>
+  </footer>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script>
     const file1Label = document.querySelector('label[for="file1"]');
     const file2Label = document.querySelector('label[for="file2"]');
     const resultDiv = document.getElementById("result");
+    const modal = document.getElementById("differenceModal");
+    const modalBody = document.getElementById("modalBody");
+    const doc1Container = document.getElementById("doc1");
+    const doc2Container = document.getElementById("doc2");
+    const documentsContainer = document.getElementById("documents");
 
     document.getElementById("file1").addEventListener("change", function() {
         file1Label.textContent = this.files[0] ? this.files[0].name : "Select the first document";
@@ -134,7 +398,7 @@
         file2Label.textContent = this.files[0] ? this.files[0].name : "Select the second document";
     });
 
-    document.getElementById("compareForm").addEventListener("submit", async function(event) {
+    document.getElementById("compareForm").addEventListener("submit", function(event) {
         event.preventDefault();
 
         const file1 = document.getElementById("file1").files[0];
@@ -145,28 +409,73 @@
             return;
         }
 
-        const formData = new FormData();
-        formData.append("file1", file1);
-        formData.append("file2", file2);
+        const reader1 = new FileReader();
+        const reader2 = new FileReader();
 
-        resultDiv.innerHTML = '<span class="loading">Comparing documents, please wait...</span>';
+        reader1.onload = function(e1) {
+            const content1 = e1.target.result;
 
-        try {
-            const response = await fetch("/compare", {
-                method: "POST",
-                body: formData
-            });
+            reader2.onload = function(e2) {
+                const content2 = e2.target.result;
+                displayDocuments(content1, content2);
+                highlightDifferences(content1, content2);
+            };
 
-            if (response.ok) {
-                const result = await response.json();
-                resultDiv.innerHTML = `The documents match by <strong>${result.matchPercentage.toFixed(2)}%</strong>`;
-            } else {
-                resultDiv.innerHTML = "Error comparing files.";
-            }
-        } catch (error) {
-            resultDiv.innerHTML = "An error occurred: " + error.message;
-        }
+            reader2.readAsText(file2);
+        };
+
+        reader1.readAsText(file1);
     });
+
+    function displayDocuments(text1, text2) {
+        doc1Container.textContent = text1;
+        doc2Container.textContent = text2;
+        documentsContainer.style.display = "flex"; // Show the documents side by side
+    }
+
+    function highlightDifferences(text1, text2) {
+        const lines1 = text1.split("\n");
+        const lines2 = text2.split("\n");
+        const maxLength = Math.max(lines1.length, lines2.length);
+        const differences = [];
+
+        for (let i = 0; i < maxLength; i++) {
+            const line1 = lines1[i] || "";
+            const line2 = lines2[i] || "";
+
+            if (line1 !== line2) {
+                differences.push(`Line ${i + 1}: <strong>${line1}</strong> vs. <strong>${line2}</strong>`);
+            }
+        }
+
+        const matchPercentage = ((1 - (differences.length / maxLength)) * 100).toFixed(2);
+        resultDiv.innerHTML = `The documents match by <strong>${matchPercentage}%</strong>.`;
+
+        // Show differences in a modal
+        if (differences.length > 0) {
+            modalBody.innerHTML = differences.join("<br>");
+            modal.style.display = "flex";
+        } else {
+            modalBody.innerHTML = "No differences found.";
+            modal.style.display = "flex";
+        }
+
+        // Highlight differences in documents
+        const highlightedDoc1 = lines1.map((line, index) => {
+            return line !== (lines2[index] || "") ? `<span class="highlight">${line}</span>` : line;
+        }).join("<br>");
+
+        const highlightedDoc2 = lines2.map((line, index) => {
+            return line !== (lines1[index] || "") ? `<span class="highlight">${line}</span>` : line;
+        }).join("<br>");
+
+        doc1Container.innerHTML = highlightedDoc1;
+        doc2Container.innerHTML = highlightedDoc2;
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
 </script>
 
 </body>
